@@ -4,6 +4,8 @@ import http from 'http'
 const server = http.createServer(app);
 import { Server } from "socket.io";
 import session from "express-session";
+import {__dirname} from "./routers/user-router.js";
+
 const io = new Server(server, {
     cors: {
         origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/',
@@ -216,6 +218,6 @@ async function sendMessageToUser(senderID, receiverID, body, isFile,conversation
 // 
 // 
 //
-
+console.log(__dirname)
 let port = process.env.PORT || 8080
 server.listen(port, () => console.log(`listening on *:${port}`));
