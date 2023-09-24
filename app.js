@@ -6,9 +6,9 @@ import { Server } from "socket.io";
 import session from "express-session";
 const io = new Server(server, {
     cors: {
-        origin: process.env.NODE_ENV === "production" ? 'goossipclientstg-30cd4ca2f0fc.herokuapp.com' : 'goossipclientstg-30cd4ca2f0fc.herokuapp.com',
+        origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/',
         methods: ["GET", "POST"],
-        allowedHeaders: ["goossipclientstg-30cd4ca2f0fc.herokuapp.com"],
+        allowedHeaders: ["https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/"],
         credentials: true
 
     }
@@ -32,7 +32,8 @@ import {getUserLikedPosts, getUserPosts, getUserPostsPhotos, getUserRetweets} fr
 
 
 let corsOptions = {
-    origin: process.env.NODE_ENV === "production" ? 'goossipclientstg-30cd4ca2f0fc.herokuapp.com' : 'goossipclientstg-30cd4ca2f0fc.herokuapp.com',
+    origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/',
+    allowedHeaders: ["https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/"],
     credentials: true
 }
 app.use(cors(corsOptions))
