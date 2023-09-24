@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import session from "express-session";
 const io = new Server(server, {
     cors: {
-        origin: 'http://localhost:3000',
+        origin: process.env.NODE_ENV === "production" ? '*' : 'http://localhost:3000',
         methods: ["GET", "POST"],
         credentials: true
 
@@ -31,7 +31,7 @@ import {getUserLikedPosts, getUserPosts, getUserPostsPhotos, getUserRetweets} fr
 
 
 let corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: process.env.NODE_ENV === "production" ? '*' : 'http://localhost:3000',
     credentials: true
 }
 app.use(cors(corsOptions))
