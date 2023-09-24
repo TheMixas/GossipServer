@@ -217,5 +217,5 @@ async function sendMessageToUser(senderID, receiverID, body, isFile,conversation
 // 
 //
 
-
-server.listen(8080, () => console.log('listening on *:8080'));
+let port = process.env.PORT || 8080
+server.listen(port, () => console.log(`listening on *:${port}`));
