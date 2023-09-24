@@ -8,6 +8,7 @@ const io = new Server(server, {
     cors: {
         origin: process.env.NODE_ENV === "production" ? 'goossipclientstg-30cd4ca2f0fc.herokuapp.com' : 'goossipclientstg-30cd4ca2f0fc.herokuapp.com',
         methods: ["GET", "POST"],
+        allowedHeaders: ["goossipclientstg-30cd4ca2f0fc.herokuapp.com"],
         credentials: true
 
     }
