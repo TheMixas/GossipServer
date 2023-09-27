@@ -10,12 +10,13 @@ const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
 export const userAvatarsDir = __dirname + "/user_images"
 
+let origin = process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000'
 
 const io = new Server(server, {
     cors: {
-        origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000',
+        origin,
         methods: ["GET", "POST"],
-        allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : "http://localhost:3000/"}`],
+        allowedHeaders: [`${origin}`],
         credentials: true
 
     }
@@ -46,11 +47,10 @@ if(process.env.NODE_ENV === "production"){
 }else {
     console.log("development")
 }
-let origin = process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000'
 console.log("origin: ", origin)
 let corsOptions = {
     origin,
-    // allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000/'}`],
+    allowedHeaders: [`${origin}`],
     credentials: true
 }
 app.use(cors(corsOptions))
