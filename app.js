@@ -46,8 +46,10 @@ if(process.env.NODE_ENV === "production"){
 }else {
     console.log("development")
 }
+let origin = process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000'
+console.log("origin: ", origin)
 let corsOptions = {
-    origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000',
+    origin,
     // allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000/'}`],
     credentials: true
 }
