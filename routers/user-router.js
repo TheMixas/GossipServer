@@ -29,13 +29,13 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 
-const userAvatarsDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_images/`
 
 import {checkToken, verifyToken} from "../middleware/auth.js";
 import * as fs from "fs";
 import multer from "multer";
 import {createPrivateConversation} from "../db/conversation-db.js";
 import {getQueriedPosts} from "../db/database.js";
+import {userAvatarsDir} from "../app.js";
 function fileFilter (req, file, cb) {
 
     

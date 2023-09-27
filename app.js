@@ -6,13 +6,16 @@ import { Server } from "socket.io";
 import session from "express-session";
 const __filename = fileURLToPath(import.meta.url);
 
+
 export const __dirname = path.dirname(__filename);
+export const userAvatarsDir = __dirname + "/user_images"
+
 
 const io = new Server(server, {
     cors: {
-        origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/',
+        origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000',
         methods: ["GET", "POST"],
-        allowedHeaders: ["https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/"],
+        allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000/'}`],
         credentials: true
 
     }
@@ -35,11 +38,12 @@ import {getUserById} from "./db/user-db.js";
 import {getUserLikedPosts, getUserPosts, getUserPostsPhotos, getUserRetweets} from "./db/post-db.js";
 import {fileURLToPath} from "url";
 import path from "path";
+import fs from "fs";
 
 
 let corsOptions = {
-    origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/',
-    allowedHeaders: ["https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/"],
+    origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000',
+    // allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000/'}`],
     credentials: true
 }
 app.use(cors(corsOptions))
@@ -223,5 +227,7 @@ async function sendMessageToUser(senderID, receiverID, body, isFile,conversation
 // 
 //
 console.log(__dirname)
+console.log(userAvatarsDir)
+console.log(await fs.readFileSync(`${userAvatarsDir}/avatar-1692568900542-685106487.jpg`))
 let port = process.env.PORT || 8080
 server.listen(port, () => console.log(`listening on *:${port}`));
