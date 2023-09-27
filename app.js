@@ -15,7 +15,7 @@ const io = new Server(server, {
     cors: {
         origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000',
         methods: ["GET", "POST"],
-        allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000/'}`],
+        allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : "http://localhost:3000/"}`],
         credentials: true
 
     }
