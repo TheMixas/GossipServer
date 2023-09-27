@@ -4,7 +4,9 @@ import http from 'http'
 const server = http.createServer(app);
 import { Server } from "socket.io";
 import session from "express-session";
-import {__dirname} from "./routers/user-router.js";
+const __filename = fileURLToPath(import.meta.url);
+
+export const __dirname = path.dirname(__filename);
 
 const io = new Server(server, {
     cors: {
@@ -31,6 +33,8 @@ import {
 import {getFriendRequests, getMutuals, getUserByUsername, getUserStats} from "./db/user-db.js";
 import {getUserById} from "./db/user-db.js";
 import {getUserLikedPosts, getUserPosts, getUserPostsPhotos, getUserRetweets} from "./db/post-db.js";
+import {fileURLToPath} from "url";
+import path from "path";
 
 
 let corsOptions = {
