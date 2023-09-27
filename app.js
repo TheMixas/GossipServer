@@ -41,6 +41,11 @@ import path from "path";
 import fs from "fs";
 
 
+if(process.env.NODE_ENV === "production"){
+    console.log("production")
+}else {
+    console.log("development")
+}
 let corsOptions = {
     origin: process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000',
     // allowedHeaders: [`${process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000/'}`],
