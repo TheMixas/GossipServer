@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 
 
 export const __dirname = path.dirname(__filename);
-export const userAvatarsDir = __dirname + "/user_images"
+export const userAvatarsDir = __dirname + "/user_images/"
 
 let origin = process.env.NODE_ENV === "production" ? 'https://goossipclientstg-30cd4ca2f0fc.herokuapp.com/' : 'http://localhost:3000'
 
@@ -50,7 +50,7 @@ if(process.env.NODE_ENV === "production"){
 console.log("origin: ", origin)
 let corsOptions = {
     origin,
-    allowedHeaders: [`${origin}`],
+    // allowedHeaders: [`${origin}`],
     credentials: true
 }
 app.use(cors(corsOptions))
