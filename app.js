@@ -49,7 +49,7 @@ if(process.env.NODE_ENV === "production"){
 console.log("origin: ", origin)
 let corsOptions = {
     origin,
-    // allowedHeaders: [`${origin}`],
+    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH'],
     credentials: true
 }
 app.use(cors(corsOptions))
