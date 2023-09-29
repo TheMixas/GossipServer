@@ -120,7 +120,7 @@ router.post('/users/register', async (req,res) =>{
             process.env.JWT_SECRET,
             {expiresIn: "7d"}
         )
-        res.set("Set-Cookie", `token1=${token}; HttpOnly; Path=/; max-age=1209600;`)
+        res.set("Set-Cookie", `token1=${token}; HttpOnly; Path=/; SameSite=None; max-age=1209600;`)
 
         return res.status(201).send(user)
     }catch (e){
@@ -186,14 +186,14 @@ router.post('/users/login', async (req,res) =>{
     let time = now.getTime();
     let expireTime = time + 1000 * 360000;
     now.setTime(expireTime);
-    res.set("Set-Cookie", `token1=${token}; HttpOnly; Path=/;  expires=${now.toUTCString()};`)
+    res.set("Set-Cookie", `token1=${token}; HttpOnly; Path=/; SameSite=None;  expires=${now.toUTCString()};`)
     return res.status(200).send(user)
 })
 
 //LOGOUT
 router.post('/users/logout', verifyToken,async (req,res) =>{
     
-    res.set("Set-Cookie", `token1=rubbish; HttpOnly; Path=/; expires=${dayjs().toDate()};`)
+    res.set("Set-Cookie", `token1=rubbish; HttpOnly; Path=/; SameSite=None; expires=${dayjs().toDate()};`)
     return res.status(200).send("logged out")
 
 })
