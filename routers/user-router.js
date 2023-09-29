@@ -186,7 +186,7 @@ router.post('/users/login', async (req,res) =>{
     let time = now.getTime();
     let expireTime = time + 1000 * 360000;
     now.setTime(expireTime);
-    res.set("Set-Cookie", `token1=${token}; HttpOnly; Path=/; SameSite=Strict; expires=${now.toUTCString()};`)
+    res.set("Set-Cookie", `token1=${token}; HttpOnly; expires=${now.toUTCString()};`)
     return res.status(200).send(user)
 })
 
