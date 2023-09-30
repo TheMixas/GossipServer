@@ -8,7 +8,8 @@ import {
 } from "../db/conversation-db.js";
 import {getFriendIds,getUserById} from "../db/user-db.js";
 import fs from "fs";
-const messageImagesDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/message_imgs/`
+import {messageImagesDir} from "../app.js";
+
 
 const router = express.Router()
 

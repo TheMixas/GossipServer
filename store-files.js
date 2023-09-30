@@ -1,5 +1,5 @@
 import fs from "fs";
-const messageImagesDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/message_imgs/`
+import {messageImagesDir} from './app.js'
 
 export async function storeFile(body) {
     //INFO: RETURNS -> fileName
