@@ -16,8 +16,13 @@ export async function createUser(username,status,gmail, password){
     return getUserById(result[0].insertId)
 }
 export async function getUserById(id,selection="*"){
-    const [rows] = await pool.query(`SELECT ${selection} FROM users WHERE id = ?`, [id])
-    return rows[0];
+    try{
+        const [rows] = await pool.query(`SELECT ${selection} FROM users WHERE id = ?`, [id])
+        return rows[0];
+    }catch (e){
+        console.log(e)
+    }
+
 }
 export async function getUserByUsername(username,selection="*"){
     const [rows] = await pool.query(`SELECT ${selection} FROM users WHERE username = ?`, [username])

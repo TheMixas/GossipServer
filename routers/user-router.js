@@ -377,18 +377,23 @@ router.get('/users/mostPopular', checkToken,async (req,res) =>{
 //NOTE: get usernames, and avatar
 router.get('/:id/namesandavatar', async (req,res) =>{
 
-    console.log("received request, contents: ", req.params.id)
-    let user = await getUserById(req.params.id,"username, avatarPath, bannerPath, name")
-    
-    if(!user){
-        
-        return res.status(404).send({error:"user not found"})
+    try{
+        console.log("received request, contents: ", req.params.id)
+        let user = await getUserById(req.params.id,"username, avatarPath, bannerPath, name")
+
+        if(!user){
+
+            return res.status(404).send({error:"user not found"})
+        }
+        //append avatar base64 to user object
+        user.avatar = fs.readFileSync(userAvatarsDir + user.avatarPath).toString('base64')
+        user.banner = fs.readFileSync(userAvatarsDir + user.bannerPath).toString('base64')
+
+        return res.status(200).send({user})
+    }catch (e) {
+
+        return res.status(500).send({error: e})
     }
-    //append avatar base64 to user object
-    user.avatar = fs.readFileSync(userAvatarsDir + user.avatarPath).toString('base64')
-    user.banner = fs.readFileSync(userAvatarsDir + user.bannerPath).toString('base64')
-    
-    return res.status(200).send({user})
 })
 
 router.get('/:id/mini-profile', checkToken, async (req,res) =>{
