@@ -19,8 +19,7 @@ let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd
 //         credentials: true
 //     }
 // });
-const io = new Server(server
-)
+const io = new Server(server)
 import bodyParser from "body-parser";
 
 import user_router from './/routers/user-router.js'
