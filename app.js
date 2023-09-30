@@ -13,14 +13,14 @@ export const postsImagesDir = __dirname + "/user_posts_images/"
 
 let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : 'http://localhost:3000'
 
-const io = new Server(server, {
-    cors: {
-        origin,
-        methods: ["GET", "POST"],
-        credentials: true
-
-    }
-});
+// const io = new Server(server, {
+//     cors: {
+//         origin,
+//         credentials: true
+//     }
+// });
+const io = new Server(server
+)
 import bodyParser from "body-parser";
 
 import user_router from './/routers/user-router.js'
