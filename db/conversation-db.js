@@ -2,8 +2,8 @@ import {pool} from "./database.js";
 import {getUserById} from "./user-db.js";
 import {storeFile} from "../store-files.js";
 import fs from "fs";
+import {userAvatarsDir} from "../app.js";
 
-const userAvatarsDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_images/`
 export async function getConversation(conversationId){
     //NOTE: Simple query to get conversation by id
     const result = await pool.query(`SELECT * FROM conversations WHERE conversation_id = ?`,[conversationId])

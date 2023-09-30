@@ -15,6 +15,7 @@ import {checkToken, verifyToken} from "../middleware/auth.js";
 import multer from "multer";
 import path from "path";
 import * as fs from "fs";
+import {userAvatarsDir,postsImagesDir} from "../app.js";
 import FormData from "form-data";
 function fileFilter (req, file, cb) {
 
@@ -41,8 +42,6 @@ const storage = multer.diskStorage({
     }
 )
 const upload = multer({storage, fileFilter})
-const postsImagesDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_posts_images/`
-const userAvatarsDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_images/`
 
 
 

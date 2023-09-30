@@ -1,8 +1,7 @@
 import {pool} from "./database.js";
 import fs from "fs";
 import {getUserById} from "./user-db.js";
-const postsImagesDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_posts_images/`
-const userAvatarsDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_images/`
+import {userAvatarsDir,postsImagesDir} from "../app.js";
 
 
 export async function likePost(postId,userId){

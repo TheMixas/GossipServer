@@ -7,8 +7,8 @@ import {
     getUserPostsPhotos,
     getUserRetweets
 } from "./post-db.js";
-const userAvatarsDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_images/`
-const postsImagesDir = `C:\\Users\\themi\\WebstormProjects\\Gossip\\server\\`+`/user_posts_images/`
+import{userAvatarsDir,postsImagesDir} from "../app.js";
+
 
 export async function createUser(username,status,gmail, password){
     const result = await pool.query(`INSERT INTO users (username, status, gmail, password)
