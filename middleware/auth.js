@@ -9,7 +9,7 @@ const config = process.env
      let cookies = parseCookies(req)
         // 
      if (cookies.token1 === undefined) {
-         return res.status(401).send("missing cookie")
+         return res.status(402).send("missing cookie")
      }
 
 
@@ -24,7 +24,7 @@ const config = process.env
          req.user = user
          // 
      } catch (e) {
-         return res.status(401).send("invalid token, error: " + e)
+         return res.status(403).send("invalid token, error: " + e)
      }
 
      return next()
