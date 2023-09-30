@@ -376,7 +376,8 @@ router.get('/users/mostPopular', checkToken,async (req,res) =>{
 
 //NOTE: get usernames, and avatar
 router.get('/:id/namesandavatar', async (req,res) =>{
-    
+
+    console.log("received request, contents: ", req.params.id)
     let user = await getUserById(req.params.id,"username, avatarPath, bannerPath, name")
     
     if(!user){
