@@ -17,6 +17,7 @@ const config = process.env
      try {
          const decoded = jwt.verify(cookies.token1, config.JWT_SECRET)
          const user = await getUserById(decoded.id)
+
          if (!user) {
              return res.status(401).send("invalid token (!user)")
          }
