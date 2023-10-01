@@ -137,6 +137,7 @@ io.on('connection', async (socket) => {
     })
     socket.on('private chat message', async (receiverID, body, media,conversationID) => {
         try{
+            console.log("starting to send private chat message")
             
             let conversation_id = conversationID
             
@@ -149,6 +150,7 @@ io.on('connection', async (socket) => {
                 await sendMessageToUser(user.id, receiverID, body, false,conversation_id)
             }
 
+            console.log("messages media: ", media)
             //Loop media and send it
             media.map(async media => {
                 //NOTE: send media
