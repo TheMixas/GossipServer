@@ -112,6 +112,7 @@ function getSocketFromAuthedSockets(id){
 }
 
 
+//Authenticate socket before connecting
 io.use(async (socket, next) => {
     
     const user = await getUserFromSocketCookie(socket.handshake.headers.cookie)
@@ -143,12 +144,15 @@ io.on('connection', async (socket) => {
             let user = getUserFromAuthedSockets(socket.id)
             
 
+            //Check for text and send it
             if(body.length !== 0){
                 await sendMessageToUser(user.id, receiverID, body, false,conversation_id)
             }
 
+            //Loop media and send it
             media.map(async media => {
                 //NOTE: send media
+                console.log("sending media: ", media)
                 await sendMessageToUser(user.id, receiverID, media, true,conversation_id)
             })
         }catch (e) {

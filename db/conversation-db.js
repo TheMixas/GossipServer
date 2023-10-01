@@ -99,6 +99,7 @@ export async function storeMessage(conversationId,senderId,body,isFile=false){
     
     if(isFile)
     {
+        console.log("storing file: ", body)
         body = await storeFile(body);
     }
 
