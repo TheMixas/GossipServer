@@ -67,7 +67,14 @@ router.get('/chat/get-private-conversation/:conversationID', verifyToken, async 
         //for each file message
         for(let i = 0; i < messages.length; i++){
             if(messages[i].isFile) {
-                let fileData = fs.readFileSync(messageImagesDir + messages[i].message_value).toString('base64')
+                let fileData = undefined;
+                    try{
+                        fileData = fs.readFileSync(messageImagesDir + messages[i].message_value).toString('base64')
+
+                    }catch (e) {
+                        console.log(e)
+                        continue
+                    }
                 //convert to blob
                 messages[i].message_value = fileData
                 //
