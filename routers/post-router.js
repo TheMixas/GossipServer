@@ -98,7 +98,6 @@ router.get('/posts/hottestPosts', checkToken,async (req,res) =>{
         res.setHeader("Content-Type", "application/json");
         return res.status(200).send({hPosts})
     }catch(e){
-        
         res.status(500).send(e)
     }
 

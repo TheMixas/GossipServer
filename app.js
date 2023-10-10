@@ -12,7 +12,7 @@ export const userAvatarsDir = __dirname + "/user_images/"
 export const postsImagesDir = __dirname + "/user_posts_images/"
 export const messageImagesDir = __dirname + "/message_imgs/"
 
-let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : 'http://localhost:3000'
+let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : 'http://localhost:8080'
 
 // const io = new Server(server, {
 //     cors: {
@@ -55,15 +55,11 @@ let corsOptions = {
 }
 app.use(express.static(path.join(__dirname + '/public')));
 app.get('/koko', (req, res) => {
-    res.send('Hello World!')
+    res.send({koko: "koko"})
 })
-app.get("/*", function (req, res) {
-    res.sendFile(path.join(__dirname, "/public/index.html"), function (err) {
-        if (err) {
-            res.status(500).send(err);
-        }
-    });
-});
+app.get('/koko2/1', (req, res) => {
+    res.send({koko: "koko2"})
+})
 
 app.use(cors(corsOptions))
 app.use(express.json())
@@ -73,6 +69,15 @@ app.use(chat_router)
 app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended:true }));
+app.get("/*", function (req, res) {
+    res.sendFile(path.join(__dirname, "/public/index.html"), function (err) {
+        if (err) {
+            res.status(500).send(err);
+        }
+    });
+});
+
+
 
 let authedSockets= []
 
