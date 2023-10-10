@@ -57,6 +57,14 @@ app.use(express.static(path.join(__dirname + '/public')));
 app.get('/koko', (req, res) => {
     res.send('Hello World!')
 })
+app.get("/*", function (req, res) {
+    res.sendFile(path.join(__dirname, "/public/index.html"), function (err) {
+        if (err) {
+            res.status(500).send(err);
+        }
+    });
+});
+
 app.use(cors(corsOptions))
 app.use(express.json())
 app.use(postRouter)
