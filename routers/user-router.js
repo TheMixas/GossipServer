@@ -145,6 +145,7 @@ router.post('/users/login', async (req,res) =>{
     
     
     const {password, credentials} = req.body
+    console.log("req.body: ", req.body)
 
 
 
@@ -327,6 +328,11 @@ router.post('/users/update', verifyToken,upload.fields([{name:'banner', maxCount
         for (let i = 0; i < Object.keys(req.body).length; i++) {
             const key = Object.keys(req.body)[i];
             if(req.body[key] !== "" && allowedUpdates.includes(key)){
+                //ecrypt password
+                if(key === "password"){
+                    updates[key] = await bcrypt.hash(req.body[key], 8)
+                    continue
+                }
                 updates[key] = req.body[key]
             }
         }

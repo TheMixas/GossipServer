@@ -36,8 +36,14 @@ export async function getUserByUsername(username,selection="*"){
     return rows[0];
 }
 export async function getUserByEmail(email){
-    const [rows] = await pool.query(`SELECT * FROM users WHERE gmail = ?`, [email])
-    return rows[0];
+    try{
+        const [rows] = await pool.query(`SELECT * FROM users WHERE gmail = ?`, [email])
+        return rows[0];
+    }
+    catch (e){
+        console.log(e)
+    }
+
 }
 
 //NOTE: Get users mutual friends
@@ -157,14 +163,20 @@ export async function getFriendIds(id) {
     return rows
 }
 export async function updateUser(id, updateValues){
-    for (let i = 0; i < Object.keys(updateValues).length; i++) {
-        //if not null or empty
-        if(Object.values(updateValues)[i] === null || Object.values(updateValues)[i] === "") return
+    try{
+        for (let i = 0; i < Object.keys(updateValues).length; i++) {
+            //if not null or empty
+            if(Object.values(updateValues)[i] === null || Object.values(updateValues)[i] === "") return
 
-        await pool.query(`UPDATE users SET ${Object.keys(updateValues)[i]} = ? WHERE id = ?`, [Object.values(updateValues)[i], id])
+            await pool.query(`UPDATE users SET ${Object.keys(updateValues)[i]} = ? WHERE id = ?`, [Object.values(updateValues)[i], id])
+        }
+
+        return "Success";
+    }
+    catch (e) {
+        console.log("SQL error on user update: ", e)
     }
 
-    return "Success";
 }
 
 export async function deleteAccount(id){

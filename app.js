@@ -12,7 +12,7 @@ export const userAvatarsDir = __dirname + "/user_images/"
 export const postsImagesDir = __dirname + "/user_posts_images/"
 export const messageImagesDir = __dirname + "/message_imgs/"
 
-let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : 'http://localhost:8080'
+let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : 'http://localhost:3000'
 
 // const io = new Server(server, {
 //     cors: {
