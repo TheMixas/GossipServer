@@ -86,9 +86,10 @@ router.get('/users/authenticated', verifyToken,async (req,res) =>{
 
 //CREATE USER / register
 router.post('/users/register', async (req,res) =>{
-    const {username,status,email,password} = req.body
+    const {username,name,email,password} = req.body
+    console.log("req.body: ", req.body)
     let user;
-    
+    console.log(1)
     
     
     if(!username || !email || !password){
@@ -97,35 +98,43 @@ router.post('/users/register', async (req,res) =>{
     if(!validator.isEmail(email)){
         return res.status(402).send({error:"invalid email"})
     }
+    console.log(2)
+
 
     //check if user exists
     await getUserByEmail(email).then((_user) => {
         user = _user
     })
+    console.log(3)
+
     if(user){
         
         return res.status(400).send({error:"user already exists"})
     }
+    console.log(4)
+
 
     let encryptedPassword = await bcrypt.hash(password, 10)
 
-    
+
+    console.log(5)
 
 
     try{
-        user = await createUser(username,status,email,encryptedPassword)
-
+        user = await createUser(username,name,email,encryptedPassword)
+        console.log(6)
         const token = jwt.sign({
             id: user.id},
             process.env.JWT_SECRET,
             {expiresIn: "7d"}
         )
+        console.log(7)
         res.set("Set-Cookie", `token1=${token}; HttpOnly; Path=/; SameSite=None; Secure; max-age=1209600;`)
-
+        console.log(8)
         return res.status(201).send(user)
     }catch (e){
         
-        return res.status(500).send({error : e})
+        return res.status(500).send(e)
     }
 
 

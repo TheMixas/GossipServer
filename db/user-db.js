@@ -10,10 +10,17 @@ import {
 import{userAvatarsDir,postsImagesDir} from "../app.js";
 
 
-export async function createUser(username,status,gmail, password){
-    const result = await pool.query(`INSERT INTO users (username, status, gmail, password)
-    VALUES (?,?,?,?)`, [username,status,gmail,password])
-    return getUserById(result[0].insertId)
+export async function createUser(username,name,gmail, password){
+    console.log("Creating user: ", username, name, gmail, password)
+    try{
+        const result = await pool.query(`INSERT INTO users (username, name, gmail, password)
+    VALUES (?,?,?,?)`, [username,name,gmail,password])
+        return getUserById(result[0].insertId)
+    }
+    catch (e){
+        console.log("sql e:", e)
+    }
+
 }
 export async function getUserById(id,selection="*"){
     try{
