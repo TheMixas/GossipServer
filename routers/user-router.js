@@ -455,16 +455,8 @@ router.get('/friendrequests',verifyToken, async (req,res) =>{
         return res.status(404).send({error:"user not found"})
     }
 
+    //FIXME: optimize by combining eveyrthing into one query
     let friendRequests = await getFriendRequests(user.id)
-    for (let friendRequest of friendRequests) {
-        
-        
-        let requester = await getUserById(friendRequest.sender_user_id, "avatarPath, name, username")
-        
-        friendRequest.avatar = fs.readFileSync(userAvatarsDir + requester.avatarPath).toString('base64')
-        friendRequest.name = requester.name
-        friendRequest.username = requester.username
-    }
 
     return res.status(200).send(friendRequests)
 })
@@ -567,13 +559,14 @@ router.post('/friendrequests/cancel', verifyToken, async (req,res) =>{
 //ACCEPT FRIEND REQUEST
 
 router.post('/friendrequests/accept', verifyToken, async (req,res) =>{
-    
+    console.log("received request at /friendrequests/accept")
     let user = req.user
     if(!user){
         return res.status(404).send({error:"user not found"})
     }
     try{
 
+        console.log("1 ")
         //Check if friend request exists
         if(await checkIfFriendRequestExists(req.body.sender_user_id,user.id) === false){
             return res.status(404).send({error:"friend request not found"})
@@ -582,11 +575,12 @@ router.post('/friendrequests/accept', verifyToken, async (req,res) =>{
         if(await checkIfFriends(req.body.sender_user_id,user.id) === true){
             return res.status(400).send({error:"friend request already accepted"})
         }
+        console.log("2 ")
 
 
         await acceptFriendRequest(user.id, req.body.sender_user_id)
         //delete friend request
-        await deleteFriendRequest(user.id, req.body.sender_user_id)
+        await deleteFriendRequest(req.body.sender_user_id,user.id)
 
         //create conversation between two users
         await createPrivateConversation(user.id, req.body.sender_user_id)

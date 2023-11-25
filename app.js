@@ -14,13 +14,8 @@ export const messageImagesDir = __dirname + "/message_imgs/"
 
 let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : 'http://localhost:3000'
 
-// const io = new Server(server, {
-//     cors: {
-//         origin,
-//         credentials: true
-//     }
-// });
-const io = new Server(server)
+
+// const io = new Server(server)
 import bodyParser from "body-parser";
 
 import user_router from './/routers/user-router.js'
@@ -52,6 +47,8 @@ let corsOptions = {
     methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH'],
     credentials: true
 }
+const io = new Server(server,
+    corsOptions);
 app.use(express.static(path.join(__dirname + '/public')));
 app.get('/koko', (req, res) => {
     res.send({koko: "koko"})
@@ -139,7 +136,7 @@ io.use(async (socket, next) => {
     next()
 })
 io.on('connection', async (socket) => {
-    
+    console.log("connected")
 
     //every conversations room
     await getUserConversations(socket.user.id).then(conversations => {

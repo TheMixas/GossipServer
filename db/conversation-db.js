@@ -90,7 +90,8 @@ export async function createPrivateConversation(user1Id,user2Id){
         await addUserToConversation(conversationId,user2Id)
         return conversationId
     }catch (e){
-        
+        console.log("Error encounreted when creating a conversation e: ",e)
+
     }
 
 }
