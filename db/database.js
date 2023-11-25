@@ -21,10 +21,7 @@ export const pool = mysql.createPool({
 
 
 
-export async function getQueriedUsers(query) {
-    const [rows] = await pool.query(`SELECT * FROM users u WHERE u.username LIKE '%${query}%'`);
-    return rows
-}
+
 export async function getQueriedPosts(query) {
     const [rows] = await pool.query(`SELECT * FROM posts p WHERE p.body LIKE '%${query}%'`);
     return rows

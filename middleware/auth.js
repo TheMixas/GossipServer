@@ -16,6 +16,7 @@ const config = process.env
      // 
      try {
          const decoded = jwt.verify(cookies.token1, config.JWT_SECRET)
+         console.log("calling getUserById from verifyToken")
          const user = await getUserById(decoded.id)
 
          if (!user) {
@@ -38,6 +39,8 @@ export const checkToken = async (req, res, next) => {
     }
     try {
         const decoded = jwt.verify(cookies.token1, config.JWT_SECRET)
+        console.log("calling getUserById from checkTokenb")
+
         const user = await getUserById(decoded.id)
         if (!user) {
             return res.status(401).send("invalid token (!user)")

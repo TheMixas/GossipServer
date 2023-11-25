@@ -36,7 +36,6 @@ import {
 } from "./db/conversation-db.js";
 import {getFriendRequests, getMutuals, getUserByUsername, getUserStats} from "./db/user-db.js";
 import {getUserById} from "./db/user-db.js";
-import {getUserLikedPosts, getUserPosts, getUserPostsPhotos, getUserRetweets} from "./db/post-db.js";
 import {fileURLToPath} from "url";
 import path from "path";
 import fs from "fs";

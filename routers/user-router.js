@@ -18,9 +18,9 @@ import {
     checkIfFriends,
     getMostPopularUsers,
     getUsersByQuery,
-    getUserMiniProfile
+    getUserMiniProfile, getOwnMiniProfile
 } from "../db/user-db.js";
-import {getPostsByQuery, getPostsLikes} from "../db/post-db.js";
+import {getPostsByQuery} from "../db/post-db.js";
 import jwt from "jsonwebtoken";
 import dayjs from "dayjs";
 const router = express.Router()
@@ -34,7 +34,6 @@ import {checkToken, verifyToken} from "../middleware/auth.js";
 import * as fs from "fs";
 import multer from "multer";
 import {createPrivateConversation} from "../db/conversation-db.js";
-import {getQueriedPosts} from "../db/database.js";
 import {userAvatarsDir} from "../app.js";
 function fileFilter (req, file, cb) {
 
@@ -237,7 +236,7 @@ router.get('/users/avatar', verifyToken, async (req,res) =>{
 router.get('/users/:id/avatar', async (req,res) =>{
 
     //print
-    
+    console.log("received request at /users/:id/avatar")
     let user = await getUserById(req.params.id)
     if(!user){
         
@@ -369,6 +368,7 @@ router.post('/users/testToken', verifyToken,async (req,res) =>{
 })
 //get username from id
 router.get('/users/:id/username', async (req,res) =>{
+    console.log("received request at /users/:id/username")
     let user = await getUserById(req.params.id)
     if(!user){
         return res.status(404).send({error:"user not found"})
@@ -379,9 +379,16 @@ router.get('/users/:id/username', async (req,res) =>{
 //NOTE: Get most popular users:
 router.get('/users/mostPopular', checkToken,async (req,res) =>{
     
-    let users = await getMostPopularUsers(10,req.user?.id)
+    let users = await getMostPopularUsers(6,req.user?.id)
     if(!users){
         return res.status(404).send({error:"users not found"})
+    }
+    for (let i = 0; i < users.length; i++) {
+        users[i].avatar = fs.readFileSync(userAvatarsDir + users[i].avatarPath).toString("base64")
+        users[i].avatarPath = undefined
+
+        users[i].banner = fs.readFileSync(userAvatarsDir + users[i].bannerPath).toString("base64")
+        users[i].bannerPath = undefined
     }
     return res.status(200).send({users})
 })
@@ -421,6 +428,21 @@ router.get('/:id/mini-profile', checkToken, async (req,res) =>{
     let miniProfile = await getUserMiniProfile( req.user?.id,user.id)
     
     return res.status(200).send({miniProfile})
+})
+router.get('/own-mini-profile', verifyToken, async (req,res) =>{
+    console.log("received request")
+    try{
+        let miniProfile = await getOwnMiniProfile(req.user.id)
+        if(!miniProfile){
+            return res.status(404).send({error:"user not found"})
+        }
+        //append image based on path
+        miniProfile.avatar = fs.readFileSync(userAvatarsDir + miniProfile.avatarPath).toString('base64')
+        miniProfile.banner = fs.readFileSync(userAvatarsDir + miniProfile.bannerPath).toString('base64')
+        return res.status(200).send({miniProfile})
+    }catch (e) {
+        return res.status(500).send({error:e})
+    }
 })
 
 
@@ -467,7 +489,7 @@ router.get('/:id/stats', async (req,res) =>{
 //GET queried results
 router.get('/search/:query', checkToken,async (req,res) =>{
     try{
-        
+        console.log("received request at /search/:query")
         let queriedPosts = await getPostsByQuery(req.params.query,99,0,req.user?.id)
         let queriedUsers = await getUsersByQuery(req.params.query,99,0,req.user?.id)
 
