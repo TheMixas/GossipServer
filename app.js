@@ -12,7 +12,7 @@ export const userAvatarsDir = __dirname + "/user_images/"
 export const postsImagesDir = __dirname + "/user_posts_images/"
 export const messageImagesDir = __dirname + "/message_imgs/"
 
-let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : 'http://localhost:3000'
+let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : ['http://localhost:3000']
 
 
 // const io = new Server(server)
@@ -48,7 +48,10 @@ let corsOptions = {
     credentials: true
 }
 const io = new Server(server,
-    corsOptions);
+    {
+        cors:corsOptions
+    });
+console.log("io: ", io)
 app.use(express.static(path.join(__dirname + '/public')));
 app.get('/koko', (req, res) => {
     res.send({koko: "koko"})
