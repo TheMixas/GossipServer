@@ -255,9 +255,9 @@ async function sendMessageToUser(senderID, receiverID, body, isFile,conversation
 // 
 // 
 //
-console.log(__dirname)
-console.log(userAvatarsDir)
-console.log("NODE_ENV",process.env.NODE_ENV)
-console.log(await fs.readFileSync(`${userAvatarsDir}/avatar-1692568900542-685106487.jpg`))
+// console.log(__dirname)
+// console.log(userAvatarsDir)
+// console.log("NODE_ENV",process.env.NODE_ENV)
+// console.log(await fs.readFileSync(`${userAvatarsDir}/avatar-1692568900542-685106487.jpg`))
 let port = process.env.PORT || 8080
 server.listen(port, () => console.log(`listening on *:${port}`));
