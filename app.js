@@ -12,7 +12,7 @@ export const userAvatarsDir = __dirname + "/user_images/"
 export const postsImagesDir = __dirname + "/user_posts_images/"
 export const messageImagesDir = __dirname + "/message_imgs/"
 
-let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : ['http://localhost:3000']
+export let origin = process.env.NODE_ENV === "production" ? 'https://gossip-server-c6dd76b8a875.herokuapp.com' : ['http://localhost:3000']
 
 
 // const io = new Server(server)
@@ -21,6 +21,7 @@ import bodyParser from "body-parser";
 import user_router from './/routers/user-router.js'
 import postRouter    from "./routers/post-router.js";
 import chat_router   from "./routers/chat-router.js";
+import forgot_password_router from "./routers/forgot-password-router.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import {getUserFromSocketCookie} from "./middleware/auth.js";
@@ -51,7 +52,6 @@ const io = new Server(server,
     {
         cors:corsOptions
     });
-console.log("io: ", io)
 app.use(express.static(path.join(__dirname + '/public')));
 app.get('/koko', (req, res) => {
     res.send({koko: "koko"})
@@ -65,6 +65,8 @@ app.use(express.json())
 app.use(postRouter)
 app.use(user_router)
 app.use(chat_router)
+app.use(forgot_password_router)
+
 app.use(cookieParser())
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended:true }));

@@ -17,7 +17,7 @@ export async function createUser(username,name,gmail, password){
     try{
         const result = await pool.query(`INSERT INTO users (username, name, gmail, password)
     VALUES (?,?,?,?)`, [username,name,gmail,password])
-        return getUserById(result[0].insertId)
+        return getUserById(result[0].insertId, "id,username,name,gmail,created")
     }
     catch (e){
         console.log("sql e:", e)
@@ -37,9 +37,9 @@ export async function getUserByUsername(username,selection="*"){
     const [rows] = await pool.query(`SELECT ${selection} FROM users WHERE username = ?`, [username])
     return rows[0];
 }
-export async function getUserByEmail(email){
+export async function getUserByEmail(email, selection="*"){
     try{
-        const [rows] = await pool.query(`SELECT * FROM users WHERE gmail = ?`, [email])
+        const [rows] = await pool.query(`SELECT ${selection} FROM users WHERE gmail = ?`, [email])
         return rows[0];
     }
     catch (e){
