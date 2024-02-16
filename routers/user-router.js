@@ -295,6 +295,7 @@ router.get('/users/banner', verifyToken, async (req,res) =>{
 //update user
 router.post('/users/update', verifyToken,upload.fields([{name:'banner', maxCount:1}, {name:'avatar', maxCount: 1}]), async (req,res) =>{
     //print req
+    //todo: redirect after successful update
     try{
         //OLD SYSTEM NEEDED TO CHECK IF OLD PASSWORD IS CORRECT
         //NEW SYSTEM, DOESNT NOT ALLOW TO CHANGE PASSWORD HERE

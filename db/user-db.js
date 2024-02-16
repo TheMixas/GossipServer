@@ -69,8 +69,17 @@ export async function getUserProfile(our_id,profileUsername){
         }
         console.log("User profile info: ", user)
         //STEP 2: Append base64 image data
-        user.avatar = fs.readFileSync(userAvatarsDir + user.avatarPath).toString("base64")
-        user.banner = fs.readFileSync(userAvatarsDir + user.bannerPath).toString("base64")
+        //if avatar from fsreadfilessync is null, use default avatar
+        try {
+            user.avatar = fs.readFileSync(userAvatarsDir + user.avatarPath).toString("base64");
+        } catch (error) {
+            user.avatar = fs.readFileSync(userAvatarsDir + "avatar-1692873944883-551936090.jpg").toString("base64");
+        }
+        try {
+            user.banner = fs.readFileSync(userAvatarsDir + user.bannerPath).toString("base64");
+        } catch (error) {
+            user.banner = fs.readFileSync(userAvatarsDir + "banner-1693864608942-414035058.png").toString("base64");
+        }
         user.avatarPath = undefined
         user.bannerPath = undefined
 
