@@ -37,7 +37,7 @@ export function readAllPostsImages(posts){
     for (let i = 0; i < posts.length; i++) {
         console.log("i: ", i)
         //Append avatar photos
-        posts[i].avatar = readImagesFromPath(posts[i].creator_avatarPath, true)
+        posts[i].avatar = GetAvatarSafely(posts[i].creator_avatarPath)
         // console.log("Avatar: ", posts.avatar)
         posts[i].creator_avatarPath = undefined
 
@@ -69,3 +69,27 @@ export function readAllPostsImages(posts){
 //     user.bannerPath = undefined
 //     return user
 // }
+
+//functions below are used to get images safely, returning a default image if the image is not found
+export function GetAvatarSafely(avatarPath){
+    try {
+        return fs.readFileSync(userAvatarsDir + avatarPath).toString("base64");
+    } catch (error) {
+        return fs.readFileSync(userAvatarsDir + "defaultAvatar.png").toString("base64");
+    }
+}
+
+export function GetBannerSafely(bannerPath){
+    try {
+        return fs.readFileSync(userAvatarsDir + bannerPath).toString("base64");
+    } catch (error) {
+        return fs.readFileSync(userAvatarsDir + "defaultBanner.jpg").toString("base64");
+    }
+}
+export function GetPostImageSafely(imagePath){
+    try {
+        return fs.readFileSync(postsImagesDir + imagePath).toString("base64");
+    } catch (error) {
+        return fs.readFileSync(postsImagesDir + "defaultImage.png").toString("base64");
+    }
+}

@@ -1,5 +1,4 @@
 import {pool} from "./database.js";
-import fs from "fs";
 import {
     getUserLikedPosts,
     getUserPosts,
@@ -9,7 +8,7 @@ import {
 } from "./post-db.js";
 import {postsImagesDir, userAvatarsDir} from "../app.js";
 import {queryUserInfoAndFriendInfo} from "./big-queries/queryUserInfoAndFriendInfo.js";
-import {readImagesFromPath} from "../utils/utils.js";
+import {GetAvatarSafely, GetBannerSafely, GetPostImageSafely, readImagesFromPath} from "../utils/utils.js";
 
 
 export async function createUser(username,name,gmail, password){
@@ -70,16 +69,8 @@ export async function getUserProfile(our_id,profileUsername){
         console.log("User profile info: ", user)
         //STEP 2: Append base64 image data
         //if avatar from fsreadfilessync is null, use default avatar
-        try {
-            user.avatar = fs.readFileSync(userAvatarsDir + user.avatarPath).toString("base64");
-        } catch (error) {
-            user.avatar = fs.readFileSync(userAvatarsDir + "avatar-1692873944883-551936090.jpg").toString("base64");
-        }
-        try {
-            user.banner = fs.readFileSync(userAvatarsDir + user.bannerPath).toString("base64");
-        } catch (error) {
-            user.banner = fs.readFileSync(userAvatarsDir + "banner-1693864608942-414035058.png").toString("base64");
-        }
+       user.avatar = GetAvatarSafely(user.avatarPath)
+        user.banner = GetBannerSafely(user.bannerPath)
         user.avatarPath = undefined
         user.bannerPath = undefined
 
@@ -89,7 +80,9 @@ export async function getUserProfile(our_id,profileUsername){
         let postImagePaths = await getUserPostsPhotos(user.id)
         let postImages = []
         for (let path of postImagePaths) {
-            postImages.push(fs.readFileSync(postsImagesDir + path.image_path).toString("base64"))
+            postImages.push(
+                GetPostImageSafely(path)
+            )
         }
         user.postImages = postImages
         //STEP 5: Append user posts
@@ -148,8 +141,8 @@ export async function getUserMiniProfile(our_id,profileId){
 FROM users u
 WHERE u.id =?;
 `,[our_id,our_id,our_id,our_id,profileId])[0]
-        user.avatar = readImagesFromPath(user.avatarPath, true)
-        user.banner = readImagesFromPath(user.bannerPath, true)
+        user.avatar = GetAvatarSafely(user.avatarPath)
+        user.banner = GetAvatarSafely(user.bannerPath)
         return user
     }catch (e) {
         
@@ -266,8 +259,8 @@ WHERE
 
     `,[our_id,our_id,our_id,our_id,id,id,id])
     for (let i = 0; i < rows.length; i++) {
-        rows[i].avatar = readImagesFromPath(rows[i].avatarPath, true)
-        rows[i].banner = readImagesFromPath(rows[i].bannerPath, true)
+        rows[i].avatar = GetAvatarSafely(rows[i].avatarPath)
+        rows[i].banner = GetBannerSafely(rows[i].bannerPath)
 
         rows[i].avatarPath = undefined
         rows[i].bannerPath = undefined
@@ -304,8 +297,8 @@ export async function getUsersByQuery(query, limit=99, offset, ownID){
     const result = await pool.query(`SELECT id, username, name, avatarPath,bannerPath, status FROM users WHERE username LIKE '%${query}%' OR name LIKE '%${query}%' LIMIT ? OFFSET ?`, [limit, offset])
     let users = result[0]
     for (let i = 0; i < users.length; i++) {
-        users[i].avatar = fs.readFileSync(userAvatarsDir + users[i].avatarPath).toString("base64")
-        users[i].banner = fs.readFileSync(userAvatarsDir + users[i].bannerPath).toString("base64")
+        users[i].avatar = GetAvatarSafely(users[i].avatarPath)
+        users[i].banner = GetBannerSafely(users[i].bannerPath)
         users[i].avatarPath = undefined
         users[i].bannerPath = undefined
         users[i].isFriend = await checkIfFriends(users[i].id, ownID)
@@ -347,8 +340,8 @@ WHERE fr.recipient_user_id = ?;
     `,[id]);
     //
     for (let i = 0; i < rows.length; i++) {
-        rows[i].avatar = readImagesFromPath(rows[i].avatarPath, true)
-        rows[i].banner = readImagesFromPath(rows[i].bannerPath, true)
+        rows[i].avatar = GetAvatarSafely(rows[i].avatarPath)
+        rows[i].banner = GetBannerSafely(rows[i].bannerPath)
 
         rows[i].avatarPath = undefined
         rows[i].bannerPath = undefined

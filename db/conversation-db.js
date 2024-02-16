@@ -3,6 +3,7 @@ import {getUserById} from "./user-db.js";
 import {storeFile} from "../store-files.js";
 import fs from "fs";
 import {userAvatarsDir} from "../app.js";
+import {GetAvatarSafely, GetBannerSafely} from "../utils/utils.js";
 
 export async function getConversation(conversationId){
     //NOTE: Simple query to get conversation by id
@@ -32,9 +33,10 @@ export async function GetConversationWithMembers(conversationId){
         let [friendsCount] = await pool.query(`SELECT COUNT(*) as count FROM friendships WHERE user1_id = ? OR user2_id = ? `,[user.id,user.id])
         user.friendsCount = friendsCount[0].count
         if(user.avatarPath)
-            user.avatar = fs.readFileSync(userAvatarsDir+user.avatarPath).toString('base64')
+            user.avatar = GetAvatarSafely(user.avatarPath)
+
         if(user.bannerPath)
-            user.banner = fs.readFileSync(userAvatarsDir+user.bannerPath).toString('base64')
+            user.banner = GetBannerSafely(user.bannerPath)
         members[user.id] = user
     }
     conversation.members =  members

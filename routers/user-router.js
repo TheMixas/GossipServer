@@ -35,6 +35,7 @@ import * as fs from "fs";
 import multer from "multer";
 import {createPrivateConversation} from "../db/conversation-db.js";
 import {userAvatarsDir} from "../app.js";
+import {GetAvatarSafely, GetBannerSafely} from "../utils/utils.js";
 function fileFilter (req, file, cb) {
 
     
@@ -225,7 +226,7 @@ router.get('/users/avatar', verifyToken, async (req,res) =>{
             return res.status(404).send({error:"avatar not found"})
         }
 
-        let avatar = fs.readFileSync(avatarFilePath).toString('base64')
+        let avatar = GetAvatarSafely(avatarFilePath)
         return res.status(200).send({avatar})
     }catch (e){
         
@@ -253,16 +254,19 @@ router.get('/users/:id/avatar', async (req,res) =>{
         return res.status(404).send({error:"avatar not found"})
     }
 
-    await fs.readFile(avatarFilePath, (err, data) =>{
-        if(err){
-            // 
-            return res.status(500).send({error:err})
-        }else{
-            res.setHeader('Content-Type', 'image/png')
-            return res.status(200).send(data)
-        }
-        // 
-    })
+    let avatar = GetAvatarSafely(avatarFilePath)
+    return res.status(200).send(avatar)
+    //
+    // fs.readFile(avatarFilePath, (err, data) =>{
+    //     if(err){
+    //         //
+    //         return res.status(500).send({error:err})
+    //     }else{
+    //         res.setHeader('Content-Type', 'image/png')
+    //         return res.status(200).send(data)
+    //     }
+    //     //
+    // })
 })
 
 
@@ -282,7 +286,7 @@ router.get('/users/banner', verifyToken, async (req,res) =>{
             
             return res.status(404).send({error:"banner not found"})
         }
-        let banner = fs.readFileSync(avatarFilePath).toString('base64')
+        let banner = GetBannerSafely(avatarFilePath)
         return res.status(200).send({banner})
     }catch (e){
         
@@ -384,10 +388,10 @@ router.get('/users/mostPopular', checkToken,async (req,res) =>{
         return res.status(404).send({error:"users not found"})
     }
     for (let i = 0; i < users.length; i++) {
-        users[i].avatar = fs.readFileSync(userAvatarsDir + users[i].avatarPath).toString("base64")
+        users[i].avatar = GetAvatarSafely(users[i].avatarPath)
         users[i].avatarPath = undefined
 
-        users[i].banner = fs.readFileSync(userAvatarsDir + users[i].bannerPath).toString("base64")
+        users[i].banner = GetBannerSafely(users[i].bannerPath)
         users[i].bannerPath = undefined
     }
     return res.status(200).send({users})
@@ -408,8 +412,8 @@ router.get('/:id/namesandavatar', async (req,res) =>{
             return res.status(404).send({error:"user not found"})
         }
         //append avatar base64 to user object
-        user.avatar = fs.readFileSync(userAvatarsDir + user.avatarPath).toString('base64')
-        user.banner = fs.readFileSync(userAvatarsDir + user.bannerPath).toString('base64')
+        user.avatar = GetAvatarSafely(user.avatarPath)
+        user.banner = GetBannerSafely(user.bannerPath)
 
         return res.status(200).send({user})
     }catch (e) {
@@ -437,8 +441,8 @@ router.get('/own-mini-profile', verifyToken, async (req,res) =>{
             return res.status(404).send({error:"user not found"})
         }
         //append image based on path
-        miniProfile.avatar = fs.readFileSync(userAvatarsDir + miniProfile.avatarPath).toString('base64')
-        miniProfile.banner = fs.readFileSync(userAvatarsDir + miniProfile.bannerPath).toString('base64')
+        miniProfile.avatar = GetAvatarSafely(miniProfile.avatarPath)
+        miniProfile.banner = GetBannerSafely(miniProfile.bannerPath)
         return res.status(200).send({miniProfile})
     }catch (e) {
         return res.status(500).send({error:e})

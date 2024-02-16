@@ -17,6 +17,7 @@ import * as fs from "fs";
 import {userAvatarsDir,postsImagesDir} from "../app.js";
 import FormData from "form-data";
 import {getHottestPosts} from "../db/big-queries/queryHottestPosts.js";
+import {GetAvatarSafely, GetPostImageSafely} from "../utils/utils.js";
 function fileFilter (req, file, cb) {
 
     
@@ -85,7 +86,9 @@ router.get('/posts/hottestPosts', checkToken,async (req,res) =>{
             }
             //For each path, turn into base64 and push into array
             for (let j = 0; j < pathsArray; j++) {
-                postPhotos.push(fs.readFileSync(postsImagesDir+pathsArray[j]).toString('base64'))
+                postPhotos.push(
+                    GetPostImageSafely(pathsArray[j])
+                )
             }
             //orginal post photos
             pathsArray = []
@@ -97,21 +100,23 @@ router.get('/posts/hottestPosts', checkToken,async (req,res) =>{
             }
             //For each path, turn into base64 and push into array
             for (let j = 0; j < pathsArray; j++) {
-                originalPostPhotos.push(fs.readFileSync(postsImagesDir+pathsArray[j]).toString('base64'))
+                originalPostPhotos.push(
+                    GetPostImageSafely(pathsArray[j])
+                )
             }
 
             //creator avatar
             let avatarPath = hPosts[i].creator_avatarPath ?? null
             let avatarPhoto = null
             if(avatarPath !== null){
-                avatarPhoto = fs.readFileSync(userAvatarsDir+avatarPath).toString('base64')
+                avatarPhoto = GetAvatarSafely(avatarPath)
             }
 
             //original post creator avatar
             let originalAvatarPath = hPosts[i].original_creator_avatarPath ?? null
             let originalAvatarPhoto = null
             if(originalAvatarPath !== null){
-                originalAvatarPhoto = fs.readFileSync(userAvatarsDir+originalAvatarPath).toString('base64')
+                originalAvatarPhoto = GetAvatarSafely(originalAvatarPath)
             }
 
             //finally append photo arrays to post object and remove paths
@@ -189,7 +194,7 @@ router.get('/posts/getPost/:id', checkToken,async (req,res) =>{
         let {username,name,avatarPath} = await getUserById(post.creator_user_id)
         post.username = username
         post.name = name
-        post.avatar =  fs.readFileSync(userAvatarsDir+avatarPath).toString('base64')
+        post.avatar =  GetAvatarSafely(avatarPath)
         return res.status(200).send(post)
 
     }
@@ -232,7 +237,9 @@ router.post('/posts/comments', async (req,res) =>{
         const comments = await getPostComments(postId,limit,offset)
         //for each omment, append avatar
         for (let i = 0; i < comments.length; i++) {
-            comments[i].avatar = fs.readFileSync(userAvatarsDir+comments[i].post_creator_avatar).toString('base64')
+            //comments[i].post_creator_avatar
+
+            comments[i].avatar = GetAvatarSafely(comments[i].post_creator_avatar)
             comments[i].avatarPath = undefined
             let commentPhotoPathsArray = []
             let commentPhotoPathsString = comments[i].post_images
@@ -310,7 +317,7 @@ router.post('/posts/recentLikers', async (req,res) =>{
         const likers = await getPostRecentLikers(postId,limit,offset)
         //for each liker, append avatar
         for (let i = 0; i < likers.length; i++) {
-            likers[i].avatar64 = fs.readFileSync(userAvatarsDir+likers[i].avatarPath).toString('base64')
+            likers[i].avatar64 = GetAvatarSafely(likers[i].avatarPath)
             likers[i].avatarPath = undefined
         }
         return res.status(200).send(likers)

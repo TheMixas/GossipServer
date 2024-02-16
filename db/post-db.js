@@ -2,7 +2,7 @@ import {pool} from "./database.js";
 import fs from "fs";
 import {getUserById} from "./user-db.js";
 import {postsImagesDir, userAvatarsDir} from "../app.js";
-import {readAllPostsImages} from "../utils/utils.js";
+import {GetAvatarSafely, readAllPostsImages} from "../utils/utils.js";
 
 //FIXME: STOP QUERYING MORE THAN ONCE IN A FUNCTION
 
@@ -362,7 +362,8 @@ export async function getPostsByQuery(query,limit=99,offset=0,ownId=undefined){
 
     for (let i = 0; i < rows.length; i++) {
         let creator = await getUserById(rows[i].creator_user_id,"avatarPath,name,username")
-        rows[i].avatar = fs.readFileSync(userAvatarsDir+creator.avatarPath).toString('base64')
+        rows[i].avatar = GetAvatarSafely(creator.avatarPath)
+
         rows[i].name = creator.name
         rows[i].username = creator.username
         const [isLiked] = await pool.query(`SELECT * FROM post_likes WHERE liked_post_id = ? AND liker_user_id = ? OR liker_user_id = ? AND liked_post_id = ?`,[rows[i].id,ownId,ownId,rows[i].id])
