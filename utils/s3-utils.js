@@ -42,7 +42,7 @@ export async function uploadToS3(file, name) {
 //wil try to cache the file if its found
 export async function getFromS3AndCacheIt(name) {
 
-    const currentS3GetCount = 50000 ?? await receiveS3GetCount()
+    const currentS3GetCount = await receiveS3GetCount()
     if(currentS3GetCount > process.env.MONTHLY_S3_GET_LIMIT){
         throw new Error("Monthly S3 get limit reached")
     }
