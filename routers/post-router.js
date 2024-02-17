@@ -17,7 +17,8 @@ import * as fs from "fs";
 import {userAvatarsDir,postsImagesDir} from "../app.js";
 import FormData from "form-data";
 import {getHottestPosts} from "../db/big-queries/queryHottestPosts.js";
-import {GetAvatarSafely, GetPostImageSafely} from "../utils/utils.js";
+import {GetAvatarSafely, GetImageSafely} from "../utils/utils.js";
+import {uploadToS3} from "../utils/s3-utils.js";
 function fileFilter (req, file, cb) {
 
     
@@ -29,7 +30,8 @@ function fileFilter (req, file, cb) {
         cb(null, true)
     }
 }
-const storage = multer.diskStorage({
+const memoryStorage = multer.memoryStorage()
+const diskStorage = multer.diskStorage({
         destination: function (req, file, cb) {
             cb(null, 'user_posts_images/')
         },
@@ -39,10 +41,13 @@ const storage = multer.diskStorage({
         }
         // You can always pass an error if something goes wrong:
         // cb(new Error('I don\'t have a clue!'))
-
     }
 )
-const upload = multer({storage, fileFilter})
+const upload = multer({storage:memoryStorage, fileFilter,
+    limits: {
+        fileSize:process.env.MULTER_SIZE_LIMIT ?? 1024 * 1024 * 1
+    }
+})
 
 
 
@@ -82,12 +87,16 @@ router.get('/posts/hottestPosts', checkToken,async (req,res) =>{
             let postPhotos = []
             //Turn paths string into array
             if(pathsString !== null){
+                console.log("pathsString: ",pathsString)
                 pathsArray = pathsString.split(',')
             }
+            console.log("post-router pathsArray: ",pathsArray)
             //For each path, turn into base64 and push into array
-            for (let j = 0; j < pathsArray; j++) {
+            for (let j = 0; j < pathsArray.length; j++) {
+                console.log("here in for loop")
+                console.log("asking to get path: ",pathsArray[j])
                 postPhotos.push(
-                    GetPostImageSafely(pathsArray[j])
+                    await GetImageSafely(pathsArray[j])
                 )
             }
             //orginal post photos
@@ -99,9 +108,9 @@ router.get('/posts/hottestPosts', checkToken,async (req,res) =>{
                 pathsArray = pathsString.split(',')
             }
             //For each path, turn into base64 and push into array
-            for (let j = 0; j < pathsArray; j++) {
+            for (let j = 0; j < pathsArray.length; j++) {
                 originalPostPhotos.push(
-                    GetPostImageSafely(pathsArray[j])
+                    await GetImageSafely(pathsArray[j])
                 )
             }
 
@@ -109,14 +118,14 @@ router.get('/posts/hottestPosts', checkToken,async (req,res) =>{
             let avatarPath = hPosts[i].creator_avatarPath ?? null
             let avatarPhoto = null
             if(avatarPath !== null){
-                avatarPhoto = GetAvatarSafely(avatarPath)
+                avatarPhoto = await GetAvatarSafely(avatarPath)
             }
 
             //original post creator avatar
             let originalAvatarPath = hPosts[i].original_creator_avatarPath ?? null
             let originalAvatarPhoto = null
             if(originalAvatarPath !== null){
-                originalAvatarPhoto = GetAvatarSafely(originalAvatarPath)
+                originalAvatarPhoto = await GetAvatarSafely(originalAvatarPath)
             }
 
             //finally append photo arrays to post object and remove paths
@@ -185,7 +194,10 @@ router.get('/posts/getPost/:id', checkToken,async (req,res) =>{
         //get photos from paths
         let postPhotos = []//object with photo nr as key and photo as value
         for (let i = 0; i < photosPaths.length; i++) {
-            postPhotos.push(fs.readFileSync(postsImagesDir+photosPaths[i].image_path).toString('base64'))
+            postPhotos.push(
+                await GetImageSafely(photosPaths[i].image_path)
+                // fs.readFileSync(postsImagesDir+photosPaths[i].image_path).toString('base64')
+            )
         }
         post.photos = postPhotos
         //get stats
@@ -194,7 +206,7 @@ router.get('/posts/getPost/:id', checkToken,async (req,res) =>{
         let {username,name,avatarPath} = await getUserById(post.creator_user_id)
         post.username = username
         post.name = name
-        post.avatar =  GetAvatarSafely(avatarPath)
+        post.avatar =  await GetAvatarSafely(avatarPath)
         return res.status(200).send(post)
 
     }
@@ -239,7 +251,8 @@ router.post('/posts/comments', async (req,res) =>{
         for (let i = 0; i < comments.length; i++) {
             //comments[i].post_creator_avatar
 
-            comments[i].avatar = GetAvatarSafely(comments[i].post_creator_avatar)
+            console.log("comment avatarPath: ",comments[i].post_creator_avatar)
+            comments[i].avatar = await GetAvatarSafely(comments[i].post_creator_avatar)
             comments[i].avatarPath = undefined
             let commentPhotoPathsArray = []
             let commentPhotoPathsString = comments[i].post_images
@@ -251,7 +264,10 @@ router.post('/posts/comments', async (req,res) =>{
             }
             //For each path, turn into base64 and push into array
             for (let j = 0; j < commentPhotoPathsArray.length; j++) {
-                commentPhotos.push(fs.readFileSync(postsImagesDir+commentPhotoPathsArray[j]).toString('base64'))
+                commentPhotos.push(
+                    await GetImageSafely(commentPhotoPathsArray[j])
+                    // fs.readFileSync(postsImagesDir+commentPhotoPathsArray[j]).toString('base64')
+                )
             }
             comments[i].photos = commentPhotos
             console.log("commentPhotos: ",comments[i].photos)
@@ -289,12 +305,11 @@ router.post('/posts/post', verifyToken, upload.array('images', 10),async (req,re
         }
 
         if(req.files){
-            
             req.files.forEach((file) => {
-                
-                
-                
-                imagesPaths.push(file.filename)
+                //send to s3
+                let filename = file.fieldname + '-' + Date.now() + path.extname(file.originalname)
+                uploadToS3(file, filename)
+                imagesPaths.push(filename)
             })
         }
 
@@ -303,7 +318,7 @@ router.post('/posts/post', verifyToken, upload.array('images', 10),async (req,re
         return res.status(200).send({id})
     }catch (e){
         
-        return res.status(500).send(e)
+        return res.status(500).send({error: 12})
     }
 
 })
@@ -317,7 +332,7 @@ router.post('/posts/recentLikers', async (req,res) =>{
         const likers = await getPostRecentLikers(postId,limit,offset)
         //for each liker, append avatar
         for (let i = 0; i < likers.length; i++) {
-            likers[i].avatar64 = GetAvatarSafely(likers[i].avatarPath)
+            likers[i].avatar64 = await GetAvatarSafely(likers[i].avatarPath)
             likers[i].avatarPath = undefined
         }
         return res.status(200).send(likers)

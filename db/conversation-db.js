@@ -33,7 +33,7 @@ export async function GetConversationWithMembers(conversationId){
         let [friendsCount] = await pool.query(`SELECT COUNT(*) as count FROM friendships WHERE user1_id = ? OR user2_id = ? `,[user.id,user.id])
         user.friendsCount = friendsCount[0].count
         if(user.avatarPath)
-            user.avatar = GetAvatarSafely(user.avatarPath)
+            user.avatar = await GetAvatarSafely(user.avatarPath)
 
         if(user.bannerPath)
             user.banner = GetBannerSafely(user.bannerPath)
@@ -65,7 +65,7 @@ WHERE cm.user_id = ?;
     for(let i = 0; i < rows.length; i++){
         if(rows[i].isGroupChat) continue;
         let members = await getConversationMembers(rows[i].conversation_id)
-        //simple .find, limited to one element
+        //simple .find, limited to one element// we are looking for the other member
         rows[i].userID = members.find(member => member.user_id !== userId).user_id
     }
     return rows
@@ -105,7 +105,7 @@ export async function storeMessage(conversationId,senderId,body,isFile=false){
     
     if(isFile)
     {
-        console.log("storing file: ", body)
+        console.log("storing file: ")
         body = await storeFile(body);
     }
 

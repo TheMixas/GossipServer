@@ -36,6 +36,7 @@ import multer from "multer";
 import {createPrivateConversation} from "../db/conversation-db.js";
 import {userAvatarsDir} from "../app.js";
 import {GetAvatarSafely, GetBannerSafely} from "../utils/utils.js";
+import {deleteFromS3, uploadToS3} from "../utils/s3-utils.js";
 function fileFilter (req, file, cb) {
 
     
@@ -48,8 +49,8 @@ function fileFilter (req, file, cb) {
     }
 }
 
-
-const storage = multer.diskStorage({
+const memoryStorage = multer.memoryStorage()
+const diskStorage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, 'user_images/')
     },
@@ -62,7 +63,11 @@ const storage = multer.diskStorage({
 
     }
 )
-const upload = multer({storage, fileFilter})
+const upload = multer({storage:memoryStorage, fileFilter,
+    limits: {
+        fileSize:process.env.MULTER_SIZE_LIMIT  ?? 1 * 1024 * 1024, // keep images size < 2 MB
+    }
+})
 
 
 //TODO: CHANGE HTTP ONLY COOKIE NAME FROM TOKEN1 TO SOMETHING ELSE
@@ -216,17 +221,12 @@ router.get('/users/avatar', verifyToken, async (req,res) =>{
         if(!user){
             return res.status(404).send({error:"user not found"})
         }
-        let avatarFilePath = userAvatarsDir + user.avatarPath
         if(user.avatarPath === null){
-            return res.status(404).send()
+            return res.status(405).send()
         }
-        if(!fs.existsSync(avatarFilePath)){
-            //print
-            
-            return res.status(404).send({error:"avatar not found"})
-        }
+        let avatarFilePath = user.avatarPath
 
-        let avatar = GetAvatarSafely(avatarFilePath)
+        let avatar = await GetAvatarSafely(avatarFilePath)
         return res.status(200).send({avatar})
     }catch (e){
         
@@ -244,29 +244,13 @@ router.get('/users/:id/avatar', async (req,res) =>{
         
         return res.status(404).send({error:"user not found"})
     }
-    let avatarFilePath = userAvatarsDir + user.avatarPath
-    if(user.avatarPath === null){
-        return res.status(404).send()
-    }
-    if(!fs.existsSync(avatarFilePath)){
-        //print
-        
-        return res.status(404).send({error:"avatar not found"})
-    }
 
-    let avatar = GetAvatarSafely(avatarFilePath)
-    return res.status(200).send(avatar)
-    //
-    // fs.readFile(avatarFilePath, (err, data) =>{
-    //     if(err){
-    //         //
-    //         return res.status(500).send({error:err})
-    //     }else{
-    //         res.setHeader('Content-Type', 'image/png')
-    //         return res.status(200).send(data)
-    //     }
-    //     //
-    // })
+    let avatarFilePath = user.avatarPath
+
+
+    let avatar = await GetAvatarSafely(avatarFilePath)
+    return res.status(200).send({avatar})
+
 })
 
 
@@ -277,16 +261,12 @@ router.get('/users/banner', verifyToken, async (req,res) =>{
         if(!user){
             return res.status(404).send({error:"user not found"})
         }
-        let avatarFilePath = userAvatarsDir + user.bannerPath
         if(user.bannerPath === null){
             return res.status(404).send()
         }
-        if(!fs.existsSync(avatarFilePath)){
-            //print
-            
-            return res.status(404).send({error:"banner not found"})
-        }
-        let banner = GetBannerSafely(avatarFilePath)
+        let bannerFilePath = user.bannerPath
+
+        let banner = GetBannerSafely(bannerFilePath)
         return res.status(200).send({banner})
     }catch (e){
         
@@ -301,14 +281,6 @@ router.post('/users/update', verifyToken,upload.fields([{name:'banner', maxCount
     //print req
     //todo: redirect after successful update
     try{
-        //OLD SYSTEM NEEDED TO CHECK IF OLD PASSWORD IS CORRECT
-        //NEW SYSTEM, DOESNT NOT ALLOW TO CHANGE PASSWORD HERE
-        // const isMatch = await bcrypt.compare(req.body.oldPassword, req.user.password)
-
-        // if(!isMatch){
-        //
-        //     return res.status(400).send({error:"password is incorrect"})
-        // }
 
         const allowedUpdates = ["name", "status","location","email","website"]
         let updates = {}
@@ -317,13 +289,29 @@ router.post('/users/update', verifyToken,upload.fields([{name:'banner', maxCount
         if(req.files['avatar']){
             if(req.files['avatar'][0]){
                 //if avatar file exists, update user avatar
-                updates['avatarPath'] = req.files['avatar'][0].filename
+                console.log("avatar file exists, attempting to update user avatar")
+                let avatarFile = req.files['avatar'][0]
+                console.log("avatarFile: ", avatarFile)
+                let avatarName = avatarFile.fieldname + "-" + Date.now() + path.extname(avatarFile.originalname)
+                updates['avatarPath'] = avatarName
+                console.log("avatarName: ", avatarName)
+                uploadToS3(avatarFile, avatarName)
+                //remove old avatar
+                deleteFromS3(req.user.avatarPath)
+
             }
         }
         if(req.files['banner']){
             if(req.files['banner'][0]){
                 //if banner file exists, update user banner
-                updates['bannerPath'] = req.files['banner'][0].filename
+                console.log("banner file exists, attempting to update user banner")
+                let bannerFile = req.files['banner'][0]
+                let bannerName = bannerFile.fieldname + "-" + Date.now() + path.extname(bannerFile.originalname)
+                console.log("bannerName: ", bannerName)
+                updates['bannerPath'] = bannerName
+                uploadToS3(bannerFile, bannerName)
+                //remove old banner
+                deleteFromS3(req.user.bannerPath)
             }
         }
 
@@ -343,10 +331,12 @@ router.post('/users/update', verifyToken,upload.fields([{name:'banner', maxCount
 
         await updateUser(req.user.id,updates)
     }catch(e){
-        
+        console.log("user-router.js : /users/update error: ", e)
         return res.status(500).send({error : e})
     }
-    return res.status(200).send("user updated")
+    return res.redirect(`${process.env.FRONTEND_URL}/${req.user.username}`)
+
+
 })
 
 
@@ -388,7 +378,7 @@ router.get('/users/mostPopular', checkToken,async (req,res) =>{
         return res.status(404).send({error:"users not found"})
     }
     for (let i = 0; i < users.length; i++) {
-        users[i].avatar = GetAvatarSafely(users[i].avatarPath)
+        users[i].avatar = await GetAvatarSafely(users[i].avatarPath)
         users[i].avatarPath = undefined
 
         users[i].banner = GetBannerSafely(users[i].bannerPath)
@@ -412,8 +402,8 @@ router.get('/:id/namesandavatar', async (req,res) =>{
             return res.status(404).send({error:"user not found"})
         }
         //append avatar base64 to user object
-        user.avatar = GetAvatarSafely(user.avatarPath)
-        user.banner = GetBannerSafely(user.bannerPath)
+        user.avatar = await GetAvatarSafely(user.avatarPath)
+        user.banner =await GetBannerSafely(user.bannerPath)
 
         return res.status(200).send({user})
     }catch (e) {
@@ -441,8 +431,8 @@ router.get('/own-mini-profile', verifyToken, async (req,res) =>{
             return res.status(404).send({error:"user not found"})
         }
         //append image based on path
-        miniProfile.avatar = GetAvatarSafely(miniProfile.avatarPath)
-        miniProfile.banner = GetBannerSafely(miniProfile.bannerPath)
+        miniProfile.avatar =await GetAvatarSafely(miniProfile.avatarPath)
+        miniProfile.banner = await GetBannerSafely(miniProfile.bannerPath)
         return res.status(200).send({miniProfile})
     }catch (e) {
         return res.status(500).send({error:e})

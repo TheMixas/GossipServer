@@ -8,7 +8,7 @@ import {
 } from "./post-db.js";
 import {postsImagesDir, userAvatarsDir} from "../app.js";
 import {queryUserInfoAndFriendInfo} from "./big-queries/queryUserInfoAndFriendInfo.js";
-import {GetAvatarSafely, GetBannerSafely, GetPostImageSafely, readImagesFromPath} from "../utils/utils.js";
+import {GetAvatarSafely, GetBannerSafely, GetImageSafely, readImagesFromPath} from "../utils/utils.js";
 
 
 export async function createUser(username,name,gmail, password){
@@ -69,8 +69,8 @@ export async function getUserProfile(our_id,profileUsername){
         console.log("User profile info: ", user)
         //STEP 2: Append base64 image data
         //if avatar from fsreadfilessync is null, use default avatar
-       user.avatar = GetAvatarSafely(user.avatarPath)
-        user.banner = GetBannerSafely(user.bannerPath)
+       user.avatar = await GetAvatarSafely(user.avatarPath)
+        user.banner = await GetBannerSafely(user.bannerPath)
         user.avatarPath = undefined
         user.bannerPath = undefined
 
@@ -81,7 +81,7 @@ export async function getUserProfile(our_id,profileUsername){
         let postImages = []
         for (let path of postImagePaths) {
             postImages.push(
-                GetPostImageSafely(path)
+                await GetImageSafely(path.image_path)
             )
         }
         user.postImages = postImages
@@ -141,8 +141,8 @@ export async function getUserMiniProfile(our_id,profileId){
 FROM users u
 WHERE u.id =?;
 `,[our_id,our_id,our_id,our_id,profileId])[0]
-        user.avatar = GetAvatarSafely(user.avatarPath)
-        user.banner = GetAvatarSafely(user.bannerPath)
+        user.avatar = await GetAvatarSafely(user.avatarPath)
+        user.banner = await GetAvatarSafely(user.bannerPath)
         return user
     }catch (e) {
         
@@ -259,8 +259,8 @@ WHERE
 
     `,[our_id,our_id,our_id,our_id,id,id,id])
     for (let i = 0; i < rows.length; i++) {
-        rows[i].avatar = GetAvatarSafely(rows[i].avatarPath)
-        rows[i].banner = GetBannerSafely(rows[i].bannerPath)
+        rows[i].avatar = await GetAvatarSafely(rows[i].avatarPath)
+        rows[i].banner = await GetBannerSafely(rows[i].bannerPath)
 
         rows[i].avatarPath = undefined
         rows[i].bannerPath = undefined
@@ -297,8 +297,8 @@ export async function getUsersByQuery(query, limit=99, offset, ownID){
     const result = await pool.query(`SELECT id, username, name, avatarPath,bannerPath, status FROM users WHERE username LIKE '%${query}%' OR name LIKE '%${query}%' LIMIT ? OFFSET ?`, [limit, offset])
     let users = result[0]
     for (let i = 0; i < users.length; i++) {
-        users[i].avatar = GetAvatarSafely(users[i].avatarPath)
-        users[i].banner = GetBannerSafely(users[i].bannerPath)
+        users[i].avatar = await GetAvatarSafely(users[i].avatarPath)
+        users[i].banner = await GetBannerSafely(users[i].bannerPath)
         users[i].avatarPath = undefined
         users[i].bannerPath = undefined
         users[i].isFriend = await checkIfFriends(users[i].id, ownID)
@@ -340,8 +340,8 @@ WHERE fr.recipient_user_id = ?;
     `,[id]);
     //
     for (let i = 0; i < rows.length; i++) {
-        rows[i].avatar = GetAvatarSafely(rows[i].avatarPath)
-        rows[i].banner = GetBannerSafely(rows[i].bannerPath)
+        rows[i].avatar = await GetAvatarSafely(rows[i].avatarPath)
+        rows[i].banner = await GetBannerSafely(rows[i].bannerPath)
 
         rows[i].avatarPath = undefined
         rows[i].bannerPath = undefined

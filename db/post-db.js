@@ -2,7 +2,7 @@ import {pool} from "./database.js";
 import fs from "fs";
 import {getUserById} from "./user-db.js";
 import {postsImagesDir, userAvatarsDir} from "../app.js";
-import {GetAvatarSafely, readAllPostsImages} from "../utils/utils.js";
+import {GetAvatarSafely, GetImageSafely, readAllPostsImages} from "../utils/utils.js";
 
 //FIXME: STOP QUERYING MORE THAN ONCE IN A FUNCTION
 
@@ -342,7 +342,7 @@ LIMIT ?, ?
         // }
 
         // console.log("Queried specific users posts: ", rows)
-        return readAllPostsImages(rows)
+        return await readAllPostsImages(rows)
     } catch (e) {
         console.log("Encountered error while quering specific users posts: ", e)
         return null
@@ -362,7 +362,7 @@ export async function getPostsByQuery(query,limit=99,offset=0,ownId=undefined){
 
     for (let i = 0; i < rows.length; i++) {
         let creator = await getUserById(rows[i].creator_user_id,"avatarPath,name,username")
-        rows[i].avatar = GetAvatarSafely(creator.avatarPath)
+        rows[i].avatar = await GetAvatarSafely(creator.avatarPath)
 
         rows[i].name = creator.name
         rows[i].username = creator.username
@@ -376,7 +376,10 @@ export async function getPostsByQuery(query,limit=99,offset=0,ownId=undefined){
         let photoPaths = await getPostPhotosPaths(rows[i].id)
         let photos = []
         for(let photoPath of photoPaths){
-            photos.push(fs.readFileSync(postsImagesDir+photoPath.image_path).toString('base64'))
+            photos.push(
+                await GetImageSafely(photoPath.image_path)
+                // fs.readFileSync(postsImagesDir+photoPath.image_path).toString('base64')
+            )
         }
         //NOTE: Change name of photos if needed for client
         rows[i].photos = photos
@@ -479,7 +482,7 @@ LIMIT ?, ?
 
     `,[ownId,userId,offset,limit])
 
-    return readAllPostsImages(rows)
+    return await readAllPostsImages(rows)
 }
 
 //NOTE: Get retweets that could contain photos with photos appended on .photos
@@ -569,7 +572,7 @@ ORDER BY (pc.comment_count + pr.retweet_count + pl.like_count) DESC, p.created_a
 LIMIT ?, ?;
 `,[ownId,userId,offset,limit])
 
-   return readAllPostsImages(rows)
+   return await readAllPostsImages(rows)
 }
 
 
@@ -672,5 +675,5 @@ LIMIT ?,?;
 
 
     //apend images
-    return readAllPostsImages(rows)
+    return await readAllPostsImages(rows)
 }
