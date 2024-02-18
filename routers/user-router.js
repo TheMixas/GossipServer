@@ -65,7 +65,7 @@ const diskStorage = multer.diskStorage({
 )
 const upload = multer({storage:memoryStorage, fileFilter,
     limits: {
-        fileSize:process.env.MULTER_SIZE_LIMIT  ?? 1 * 1024 * 1024, // keep images size < 2 MB
+        fileSize: 2097152
     }
 })
 
