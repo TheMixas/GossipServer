@@ -20,10 +20,7 @@ import {getHottestPosts} from "../db/big-queries/queryHottestPosts.js";
 import {GetAvatarSafely, GetImageSafely} from "../utils/utils.js";
 import {uploadToS3} from "../utils/s3-utils.js";
 function fileFilter (req, file, cb) {
-
-    
     if(file.mimetype !== 'image/png' && file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg'){
-        
         cb(null, false)
     }else{
         
@@ -45,7 +42,7 @@ const diskStorage = multer.diskStorage({
 )
 const upload = multer({storage:memoryStorage, fileFilter,
     limits: {
-        fileSize:process.env.MULTER_SIZE_LIMIT ?? 1024 * 1024 * 1
+        fileSize:2097152
     }
 })
 
@@ -284,8 +281,6 @@ router.post('/posts/comments', async (req,res) =>{
 //post a post,
 router.post('/posts/post', verifyToken, upload.array('images', 10),async (req,res) =>{
     //print we are here
-    
-    
     try{
         let user = req.user
         let postBody = req.body.body
@@ -317,7 +312,7 @@ router.post('/posts/post', verifyToken, upload.array('images', 10),async (req,re
         let id = await createPost(user.id, postBody, imagesPaths,ogPostId, isComment, isRetweet)
         return res.status(200).send({id})
     }catch (e){
-        
+        console.log("error while posting: ",e)
         return res.status(500).send({error: 12})
     }
 

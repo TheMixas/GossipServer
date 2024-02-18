@@ -45,12 +45,13 @@ if(process.env.NODE_ENV === "production"){
 console.log("origin: ", origin)
 let corsOptions = {
     origin,
-    methods: ['GET','POST','DELETE','UPDATE','PUT','PATCH'],
+    methods: ['GET', 'POST', 'DELETE', 'UPDATE', 'PUT', 'PATCH'],
     credentials: true
+    //limit: 3mb,
 }
 const io = new Server(server,
     {
-        cors:corsOptions
+        cors:corsOptions,
     });
 app.use(express.static(path.join(__dirname + '/public')));
 app.get('/koko', (req, res) => {
@@ -61,7 +62,8 @@ app.get('/koko2/1', (req, res) => {
 })
 
 app.use(cors(corsOptions))
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(postRouter)
 app.use(user_router)
 app.use(chat_router)
@@ -128,6 +130,7 @@ function getSocketFromAuthedSockets(id){
     })[0].socket
 }
 
+const MAX_PACKET_SIZE = 2097152; // 2MB in bytes
 
 //Authenticate socket before connecting
 io.use(async (socket, next) => {
@@ -154,6 +157,12 @@ io.on('connection', async (socket) => {
     })
     socket.on('private chat message', async (receiverID, body, media,conversationID) => {
         try{
+            const dataSize = 4096
+            if (dataSize > MAX_PACKET_SIZE) {
+                console.log('Data exceeds maximum packet size');
+                return;
+            }
+
             console.log("starting to send private chat message")
             
             let conversation_id = conversationID
@@ -173,13 +182,17 @@ io.on('connection', async (socket) => {
                 await sendMessageToUser(user.id, receiverID, media, true,conversation_id)
             })
         }catch (e) {
-            
+            console.log("error sending private chat message: ", e)
         }
 
     })
     socket.on('group chat message', async (conversationID, body,media )=> {
         try{
-            
+            const dataSize = Buffer.byteLength(JSON.stringify({receiverID, body, media, conversationID}), 'utf8');
+            if (dataSize > MAX_PACKET_SIZE) {
+                console.log('Data exceeds maximum packet size');
+                return;
+            }
             //NOTE: send text
             await sendMessageToConversation(socket.id, conversationID, body, false)
             media.map(async media => {
