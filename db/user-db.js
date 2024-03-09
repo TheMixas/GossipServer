@@ -87,6 +87,7 @@ export async function getUserProfile(our_id,profileUsername){
         user.postImages = postImages
         //STEP 5: Append user posts
         //Query optimized
+        //FIXME: returns faulty like data (cant see own like)
         user.posts = await getUserPosts(user.id, our_id,99,0)
         // for(let post of user.posts){
         //     console.log("Post: ", post)
@@ -97,10 +98,14 @@ export async function getUserProfile(our_id,profileUsername){
         //     // }
         // }
         //STEP 6: Append user retweetts
+        //FIXME: returns faulty like data (cant see own like)
+
         user.retweets = await getUserRetweets(user.id,our_id,99,0)
         //STEP 7: Append user liked posts
         user.likedPosts = await getUserLikedPosts(user.id,our_id,99,0)
         //STEP 8: Append user posts with photos
+        //FIXME: returns faulty like data (cant see own like)
+
         user.photoPosts = await getUserPostsContainingPhotos(user.id,our_id,99,0)
         //STEP 9: Append user friends
         user.friends = await getFriends(user.id, our_id)

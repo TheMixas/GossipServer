@@ -401,7 +401,7 @@ SELECT
     p.creator_user_id, 
     p.created_at,
     p.original_post_id,
-    p.isRetweet,
+    p.isRetweet,  
     p.isComment,
     COALESCE(pc.comment_count, 0) AS comment_count,
     COALESCE(pr.retweet_count, 0) AS retweet_count,
@@ -637,7 +637,7 @@ LEFT JOIN (
 LEFT JOIN (
     SELECT liked_post_id, liker_user_id
     FROM post_likes
-    WHERE liker_user_id = 27
+    WHERE liker_user_id = ?
 ) plu ON p.id = plu.liked_post_id
 LEFT JOIN posts_images pi ON p.id = pi.post_id
 LEFT JOIN posts op ON p.original_post_id = op.id
@@ -671,7 +671,7 @@ GROUP BY p.id
 ORDER BY (pc.comment_count + pr.retweet_count + pl.like_count) DESC, p.created_at DESC
 LIMIT ?,?;
 
-    `,[ownId,userId,offset,limit])
+    `,[userId,ownId,userId,offset,limit])
 
 
     //apend images
